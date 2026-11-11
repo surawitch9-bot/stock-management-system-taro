@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการสต็อกสินค้า (Stock Management)</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-color: #fcf4f6;
+      --card-bg: #ffffff;
+      --primary: #ff9ebb;
+      --primary-hover: #ff7597;
+      --secondary: #a3c4f3;
+      --accent: #b9fbc0;
+      --text-main: #4a4e69;
+      --text-light: #8d99ae;
+      --danger: #ff85a1;
+      --warning: #fbc4ab;
+      --success: #95d5b2;
+      --border-radius: 16px;
+      --shadow: 0 8px 20px rgba(255, 158, 187, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Page Container --- */
+    .app-header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary-hover);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .icon-btn {
+      background: #f8f9fa;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--text-main);
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: var(--danger);
+      color: white;
+      font-size: 0.7rem;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff5f7;
+      padding: 5px 15px 5px 8px;
+      border-radius: 30px;
+      border: 1px solid #ffe1e8;
+    }
+
+    .avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--secondary);
+    }
+
+    .btn-logout {
+      background: #ffe3e3;
+      color: #d63031;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #ff7675;
+      color: white;
+    }
+
+    .main-container {
+      max-width: 1000px;
+      width: 90%;
+      margin: 2rem auto;
+      flex: 1;
+    }
+
+    /* --- Card & Forms --- */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 1.8rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #edf2f7;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* --- Login Section --- */
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffe5ec 0%, #f0ef6410 100%);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .login-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .error-msg {
+      color: #e63946;
+      background: #ffe5e5;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    /* --- List & Tables --- */
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .product-card {
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      text-align: center;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+    .status-full { background: #d8f3dc; color: #2d6a4f; }
+    .status-low { background: #fff3bf; color: #d9480f; }
+    .status-out { background: #ffe3e3; color: #c92a2a; }
+
+    .history-item {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    /* Modal / Popup */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      border-radius: var(--border-radius);
+      padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+
+    .hidden { display: none !important; }
+
+    .img-preview {
+      width: 100%;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .img-thumb {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SECTION -->
+  <div id="loginSection" class="login-wrapper">
+    <div class="card login-card">
+      <div class="login-icon"><i class="fa-solid fa-boxes-packing"></i></div>
+      <h2 style="margin-bottom: 5px;">เข้าสู่ระบบจัดการสต็อก</h2>
+      <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">กรุณากรอก Gmail เพื่อเข้าใช้งานระบบ</p>
+      
+      <div id="loginError" class="error-msg">❌ พิมพ์ Gmail ผิด กรุณาลองใหม่อีกครั้ง</div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <input type="email" id="emailInput" class="form-control" placeholder="กรอก Gmail ของคุณที่นี่..." required style="text-align: center;">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">ลงชื่อเข้าใช้ <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP SECTION -->
+  <div id="appSection" class="hidden">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <i class="fa-solid fa-store"></i> <span id="appRoleTitle">ระบบจัดการสต็อก</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="notifBtn" onclick="toggleModal('notifModal')">
+          <i class="fa-regular fa-bell"></i>
+          <span class="badge" id="notifBadge">0</span>
+        </button>
+        <div class="user-profile-badge">
+          <img id="headerAvatar" src="https://via.placeholder.com/32" class="avatar-sm" alt="Profile">
+          <span id="headerName" style="font-size: 0.9rem; font-weight: 500;">User Name</span>
+        </div>
+        <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</button>
+      </div>
+    </header>
+
+    <div class="main-container">
+
+      <!-- ================= 👑 OWNER DASHBOARD ================= -->
+      <div id="ownerDashboard" class="role-dashboard hidden">
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-plus-circle"></i> เพิ่ม / อัปเดตรายการสินค้า</h3>
+          <form id="ownerAddProductForm">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+              <input type="text" id="ownerProdName" class="form-control" placeholder="ชื่อสินค้า..." required>
+              <select id="ownerProdStatus" class="form-control">
+                <option value="เต็มถัง">เต็มถัง</option>
+                <option value="ใกล้หมดแล้ว">ใกล้หมดแล้ว</option>
+                <option value="หมดแล้ว">หมดแล้ว</option>
+              </select>
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> บันทึก</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-layer-group"></i> สถานะรายการสินค้าปัจจุบัน</h3>
+          <div id="ownerProductGrid" class="item-grid">
+            <!-- Product Cards render here -->
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-paper-plane"></i> ส่งข้อความแจ้งเตือนหาพนักงาน</h3>
+          <form id="ownerSendNotifForm">
+            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px;">
+              <select id="targetStaff" class="form-control">
+                <option value="ssuwinai@gmail.com">พนักงานแพ็คและผลิต</option>
+                <option value="susususy81@gmail.com">พนักงานขาย</option>
+              </select>
+              <input type="text" id="ownerMessage" class="form-control" placeholder="พิมพ์รายละเอียดข้อความ..." required>
+              <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-paper-plane"></i> ส่งเตือน</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติรายงานจากพนักงานทั้งหมด</h3>
+          <div id="ownerHistoryList">
+            <!-- History items -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 📦 PACKING DASHBOARD ================= -->
+      <div id="packingDashboard" class="role-dashboard hidden">
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-id-card"></i> ข้อมูลโปรไฟล์พนักงานแพ็ค</h3>
+          <div style="display: flex; gap: 15px; align-items: center;">
+            <img id="packAvatarPreview" src="https://via.placeholder.com/60" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+            <input type="text" id="packStaffName" class="form-control" placeholder="ตั้งชื่อ-นามสกุล...">
+            <input type="file" id="packAvatarInput" accept="image/*" class="form-control" style="width: auto;">
+            <button onclick="savePackProfile()" class="btn btn-primary">บันทึกโปรไฟล์</button>
+          </div>
+        </div>
+
+        <!-- ปุ่มสลับแบบ 🔔 Notification สำหรับพนักงานแพ็ค -->
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-bell"></i> รายงานงานแพ็คสินค้า (Notification)</h3>
+          <form id="packReportForm">
+            <input type="hidden" id="editReportId">
+            <div class="form-group">
+              <label>ชื่อสินค้า</label>
+              <input type="text" id="packProdName" class="form-control" placeholder="ระบุชื่อสินค้า..." required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+              <div>
+                <label>สถานะ</label>
+                <select id="packStatus" class="form-control">
+                  <option value="ซื้อแล้ว">ซื้อแล้ว</option>
+                  <option value="ยังไม่ได้ซื้อ">ยังไม่ได้ซื้อ</option>
+                </select>
+              </div>
+              <div>
+                <label>ราคา (บาท)</label>
+                <input type="number" id="packPrice" class="form-control" placeholder="0.00">
+              </div>
+              <div>
+                <label>อัปโหลดรูปภาพสินค้า</label>
+                <input type="file" id="packImgInput" accept="image/*" class="form-control">
+              </div>
+            </div>
+            <button type="submit" id="packSubmitBtn" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> ส่งรายงานให้เจ้าของร้าน</button>
+          </form>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> รายงานสินค้าหมด</h3>
+            <form id="packOutStockForm">
+              <input type="text" id="outProdName" class="form-control" placeholder="ชื่อสินค้าที่หมด..." required style="margin-bottom: 10px;">
+              <select id="outStatus" class="form-control" style="margin-bottom: 10px;">
+                <option value="หมดแล้ว">หมดแล้ว</option>
+                <option value="ใกล้หมดแล้ว">ใกล้หมดแล้ว</option>
+              </select>
+              <button type="submit" class="btn btn-secondary btn-block">แจ้งเจ้าของร้านทันที</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-circle-exclamation"></i> แจ้งปัญหา</h3>
+            <form id="packIssueForm">
+              <textarea id="packIssueText" class="form-control" rows="3" placeholder="ระบุรายละเอียดปัญหา..." required style="margin-bottom: 10px;"></textarea>
+              <button type="submit" class="btn btn-secondary btn-block">ส่งรายงานปัญหา</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-list-check"></i> รายงานแพ็คสินค้าของคุณ (สามารถแก้ไขได้)</h3>
+          <div id="packMyHistory"></div>
+        </div>
+      </div>
+
+      <!-- ================= 🛍️ SALES DASHBOARD ================= -->
+      <div id="salesDashboard" class="role-dashboard hidden">
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-id-card"></i> ข้อมูลโปรไฟล์พนักงานขาย</h3>
+          <div style="display: flex; gap: 15px; align-items: center;">
+            <img id="salesAvatarPreview" src="https://via.placeholder.com/60" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+            <input type="text" id="salesStaffName" class="form-control" placeholder="ตั้งชื่อ-นามสกุล...">
+            <input type="file" id="salesAvatarInput" accept="image/*" class="form-control" style="width: auto;">
+            <button onclick="saveSalesProfile()" class="btn btn-primary">บันทึกโปรไฟล์</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-cart-plus"></i> สั่งซื้อสินค้า (ถุงละ 10 บาท)</h3>
+          <form id="salesOrderForm">
+            <div class="form-group">
+              <label>สั่งซื้ออะไร</label>
+              <input type="text" id="salesOrderName" class="form-control" placeholder="ชื่อสินค้า..." required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+              <div>
+                <label>จำนวน (ถุง/ชิ้น)</label>
+                <input type="number" id="salesQty" class="form-control" value="1" min="1" oninput="calcSalesPrice()" required>
+              </div>
+              <div>
+                <label>ราคารวมทั้งหมด</label>
+                <input type="text" id="salesTotalPrice" class="form-control" value="10 บาท" readonly style="background: #e9ecef; font-weight: bold; color: var(--primary-hover);">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-paper-plane"></i> ส่งรายการสั่งซื้อ</button>
+          </form>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-boxes-stacked"></i> รายงานสินค้าคงเหลือ</h3>
+            <form id="salesStockForm">
+              <input type="text" id="stockProdName" class="form-control" placeholder="ชื่อสินค้า..." required style="margin-bottom: 10px;">
+              <input type="number" id="stockQty" class="form-control" placeholder="จำนวนคงเหลือที่เหลือนับได้..." required style="margin-bottom: 10px;">
+              <button type="submit" class="btn btn-secondary btn-block">ส่งรายงานจำนวนเหลือ</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-circle-exclamation"></i> แจ้งปัญหา</h3>
+            <form id="salesIssueForm">
+              <textarea id="salesIssueText" class="form-control" rows="3" placeholder="ระบุปัญหาการขาย..." required style="margin-bottom: 10px;"></textarea>
+              <button type="submit" class="btn btn-secondary btn-block">ส่งรายงานปัญหา</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NOTIFICATION MODAL -->
+  <div id="notifModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-bell"></i> กล่องแจ้งเตือน (Notifications)</h3>
+        <button class="close-btn" onclick="toggleModal('notifModal')">&times;</button>
+      </div>
+      <div id="notifListContainer">
+        <!-- Notification list -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Database Simulation with LocalStorage
+    const ACCOUNTS = {
+      OWNER: 'surawitch9@gmail.com',
+      PACKING: 'ssuwinai@gmail.com',
+      SALES: 'susususy81@gmail.com'
+    };
+
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let products = JSON.parse(localStorage.getItem('products')) || [
+      { id: 1, name: 'ถุงพลาสติก 6x11', status: 'เต็มถัง' },
+      { id: 2, name: 'กล่องพัสดุ Size S', status: 'ใกล้หมดแล้ว' }
+    ];
+    let reports = JSON.parse(localStorage.getItem('reports')) || [];
+    let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+    let profiles = JSON.parse(localStorage.getItem('profiles')) || {
+      'ssuwinai@gmail.com': { name: 'พนักงานแพ็ค', avatar: 'https://via.placeholder.com/60' },
+      'susususy81@gmail.com': { name: 'พนักงานขาย', avatar: 'https://via.placeholder.com/60' }
+    };
+
+    // Save state
+    function saveData() {
+      localStorage.setItem('products', JSON.stringify(products));
+      localStorage.setItem('reports', JSON.stringify(reports));
+      localStorage.setItem('notifications', JSON.stringify(notifications));
+      localStorage.setItem('profiles', JSON.stringify(profiles));
+    }
+
+    // Initialize App
+    window.onload = function() {
+      if (currentUser) {
+        showAppScreen();
+      } else {
+        showLoginScreen();
+      }
+    };
+
+    // Login Form Submit
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      
+      if (email === ACCOUNTS.OWNER || email === ACCOUNTS.PACKING || email === ACCOUNTS.SALES) {
+        currentUser = email;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        document.getElementById('loginError').style.display = 'none';
+        showAppScreen();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    });
+
+    // Logout
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      showLoginScreen();
+    }
+
+    function showLoginScreen() {
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('appSection').classList.add('hidden');
+      document.getElementById('emailInput').value = '';
+    }
+
+    function showAppScreen() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('appSection').classList.remove('hidden');
+
+      // Hide all role dashboards
+      document.querySelectorAll('.role-dashboard').forEach(d => d.classList.add('hidden'));
+
+      // Render Header Info
+      const avatarImg = document.getElementById('headerAvatar');
+      const nameText = document.getElementById('headerName');
+
+      if (currentUser === ACCOUNTS.OWNER) {
+        document.getElementById('ownerDashboard').classList.remove('hidden');
+        document.getElementById('appRoleTitle').innerText = 'เจ้าของร้าน (Owner)';
+        nameText.innerText = 'คุณเจ้าของร้าน';
+        avatarImg.src = 'https://ui-avatars.com/api/?name=Owner&background=ff9ebb&color=fff';
+        renderOwnerDashboard();
+      } 
+      else if (currentUser === ACCOUNTS.PACKING) {
+        document.getElementById('packingDashboard').classList.remove('hidden');
+        document.getElementById('appRoleTitle').innerText = 'งานแพ็คและผลิตสินค้า';
+        const p = profiles[ACCOUNTS.PACKING] || {};
+        nameText.innerText = p.name || 'พนักงานแพ็ค';
+        avatarImg.src = p.avatar || 'https://via.placeholder.com/32';
+        document.getElementById('packStaffName').value = p.name || '';
+        document.getElementById('packAvatarPreview').src = p.avatar || 'https://via.placeholder.com/60';
+        renderPackHistory();
+      } 
+      else if (currentUser === ACCOUNTS.SALES) {
+        document.getElementById('salesDashboard').classList.remove('hidden');
+        document.getElementById('appRoleTitle').innerText = 'แผนกการขาย';
+        const p = profiles[ACCOUNTS.SALES] || {};
+        nameText.innerText = p.name || 'พนักงานขาย';
+        avatarImg.src = p.avatar || 'https://via.placeholder.com/32';
+        document.getElementById('salesStaffName').value = p.name || '';
+        document.getElementById('salesAvatarPreview').src = p.avatar || 'https://via.placeholder.com/60';
+      }
+
+      updateNotifBadge();
+    }
+
+    // --- OWNER FUNCTIONS ---
+    function renderOwnerDashboard() {
+      // Product Grid
+      const pGrid = document.getElementById('ownerProductGrid');
+      pGrid.innerHTML = '';
+      products.forEach(p => {
+        let badgeClass = p.status === 'เต็มถัง' ? 'status-full' : (p.status === 'ใกล้หมดแล้ว' ? 'status-low' : 'status-out');
+        pGrid.innerHTML += `
+          <div class="product-card">
+            <h4>${p.name}</h4>
+            <span class="status-badge ${badgeClass}">${p.status}</span>
+          </div>
+        `;
+      });
+
+      // History
+      const hList = document.getElementById('ownerHistoryList');
+      hList.innerHTML = '';
+      if(reports.length === 0) hList.innerHTML = '<p style="color:var(--text-light); text-align:center;">ยังไม่มีรายงานเข้ามา</p>';
+      
+      reports.slice().reverse().forEach(r => {
+        let imgHtml = r.img ? `<img src="${r.img}" class="img-thumb">` : '';
+        hList.innerHTML += `
+          <div class="history-item">
+            <div style="display:flex; gap:10px; align-items:center;">
+              ${imgHtml}
+              <div>
+                <strong>[${r.roleName}] ${r.title}</strong>
+                <div style="font-size:0.85rem; color:var(--text-light);">${r.detail} | วันที่: ${r.date}</div>
+              </div>
+            </div>
+            <span class="status-badge status-full">${r.status || 'บันทึกแล้ว'}</span>
+          </div>
+        `;
+      });
+    }
+
+    // Owner Add Product
+    document.getElementById('ownerAddProductForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = document.getElementById('ownerProdName').value;
+      const status = document.getElementById('ownerProdStatus').value;
+
+      products.push({ id: Date.now(), name, status });
+      saveData();
+      renderOwnerDashboard();
+      this.reset();
+    });
+
+    // Owner Send Notification
+    document.getElementById('ownerSendNotifForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const target = document.getElementById('targetStaff').value;
+      const msg = document.getElementById('ownerMessage').value;
+
+      notifications.push({
+        id: Date.now(),
+        targetEmail: target,
+        sender: 'เจ้าของร้าน',
+        message: msg,
+        date: new Date().toLocaleString('th-TH')
+      });
+      saveData();
+      alert('ส่งการแจ้งเตือนสำเร็จ!');
+      this.reset();
+    });
+
+    // --- PACKING FUNCTIONS ---
+    function savePackProfile() {
+      const name = document.getElementById('packStaffName').value;
+      const fileInput = document.getElementById('packAvatarInput');
+      
+      let avatar = profiles[ACCOUNTS.PACKING]?.avatar || 'https://via.placeholder.com/60';
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profiles[ACCOUNTS.PACKING] = { name, avatar: e.target.result };
+          saveData();
+          showAppScreen();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        profiles[ACCOUNTS.PACKING] = { name, avatar };
+        saveData();
+        showAppScreen();
+      }
+    }
+
+    // Packing Submit Report (Create / Edit)
+    document.getElementById('packReportForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const editId = document.getElementById('editReportId').value;
+      const name = document.getElementById('packProdName').value;
+      const status = document.getElementById('packStatus').value;
+      const price = document.getElementById('packPrice').value;
+      const fileInput = document.getElementById('packImgInput');
+
+      const processSave = (imgData) => {
+        if(editId) {
+          // Edit
+          let item = reports.find(r => r.id == editId);
+          if(item) {
+            item.title = `รายงานแพ็ค: ${name}`;
+            item.detail = `สถานะ: ${status} | ราคา: ${price || 0} บาท`;
+            if(imgData) item.img = imgData;
+          }
+          document.getElementById('editReportId').value = '';
+          document.getElementById('packSubmitBtn').innerHTML = '<i class="fa-solid fa-paper-plane"></i> ส่งรายงานให้เจ้าของร้าน';
+        } else {
+          // Create New
+          reports.push({
+            id: Date.now(),
+            sender: ACCOUNTS.PACKING,
+            roleName: 'พนักงานแพ็ค',
+            title: `รายงานแพ็ค: ${name}`,
+            detail: `สถานะ: ${status} | ราคา: ${price || 0} บาท`,
+            status: status,
+            img: imgData || '',
+            date: new Date().toLocaleString('th-TH')
+          });
+        }
+        saveData();
+        renderPackHistory();
+        this.reset();
+        alert('บันทึกข้อมูลเรียบร้อย!');
+      };
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => processSave(e.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        processSave(null);
+      }
+    });
+
+    function renderPackHistory() {
+      const container = document.getElementById('packMyHistory');
+      container.innerHTML = '';
+      const myReports = reports.filter(r => r.sender === ACCOUNTS.PACKING);
+
+      if(myReports.length === 0) container.innerHTML = '<p style="color:var(--text-light); text-align:center;">ยังไม่มีประวัติส่งงาน</p>';
+
+      myReports.slice().reverse().forEach(r => {
+        let imgHtml = r.img ? `<img src="${r.img}" class="img-thumb">` : '';
+        container.innerHTML += `
+          <div class="history-item">
+            <div style="display:flex; gap:10px; align-items:center;">
+              ${imgHtml}
+              <div>
+                <strong>${r.title}</strong>
+                <div style="font-size:0.85rem; color:var(--text-light);">${r.detail} (${r.date})</div>
+              </div>
+            </div>
+            <button class="btn btn-secondary" style="padding:4px 10px; font-size:0.8rem;" onclick="editPackReport(${r.id})">Edit</button>
+          </div>
+        `;
+      });
+    }
+
+    function editPackReport(id) {
+      const item = reports.find(r => r.id == id);
+      if(item) {
+        document.getElementById('editReportId').value = item.id;
+        document.getElementById('packProdName').value = item.title.replace('รายงานแพ็ค: ', '');
+        document.getElementById('packSubmitBtn').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> แก้ไขรายงาน';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Packing Out of Stock
+    document.getElementById('packOutStockForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = document.getElementById('outProdName').value;
+      const status = document.getElementById('outStatus').value;
+
+      reports.push({
+        id: Date.now(),
+        sender: ACCOUNTS.PACKING,
+        roleName: 'พนักงานแพ็ค',
+        title: `แจ้งสินค้าหมด/ใกล้หมด: ${name}`,
+        detail: `สถานะสต็อก: ${status}`,
+        date: new Date().toLocaleString('th-TH')
+      });
+      saveData();
+      alert('ส่งการรายงานเรียบร้อย!');
+      this.reset();
+    });
+
+    // Packing Issue
+    document.getElementById('packIssueForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const txt = document.getElementById('packIssueText').value;
+
+      reports.push({
+        id: Date.now(),
+        sender: ACCOUNTS.PACKING,
+        roleName: 'พนักงานแพ็ค',
+        title: `⚠️ แจ้งปัญหาจากแผนกแพ็ค`,
+        detail: txt,
+        date: new Date().toLocaleString('th-TH')
+      });
+      saveData();
+      alert('ส่งแจ้งปัญหาเรียบร้อย!');
+      this.reset();
+    });
+
+    // --- SALES FUNCTIONS ---
+    function saveSalesProfile() {
+      const name = document.getElementById('salesStaffName').value;
+      const fileInput = document.getElementById('salesAvatarInput');
+      
+      let avatar = profiles[ACCOUNTS.SALES]?.avatar || 'https://via.placeholder.com/60';
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profiles[ACCOUNTS.SALES] = { name, avatar: e.target.result };
+          saveData();
+          showAppScreen();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        profiles[ACCOUNTS.SALES] = { name, avatar };
+        saveData();
+        showAppScreen();
+      }
+    }
+
+    function calcSalesPrice() {
+      const qty = document.getElementById('salesQty').value || 0;
+      document.getElementById('salesTotalPrice').value = (qty * 10) + ' บาท';
+    }
+
+    // Sales Submit Order
+    document.getElementById('salesOrderForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = document.getElementById('salesOrderName').value;
+      const qty = document.getElementById('salesQty').value;
+      const price = qty * 10;
+
+      reports.push({
+        id: Date.now(),
+        sender: ACCOUNTS.SALES,
+        roleName: 'พนักงานขาย',
+        title: `สั่งซื้อสินค้า: ${name}`,
+        detail: `จำนวน: ${qty} ถุง | ราคารวม: ${price} บาท`,
+        date: new Date().toLocaleString('th-TH')
+      });
+      saveData();
+      alert('ส่งรายการสั่งซื้อเรียบร้อย!');
+      this.reset();
+      calcSalesPrice();
+    });
+
+    // Sales Stock Remaining
+    document.getElementById('salesStockForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = document.getElementById('stockProdName').value;
+      const qty = document.getElementById('stockQty').value;
+
+      reports.push({
+        id: Date.now(),
+        sender: ACCOUNTS.SALES,
+        roleName: 'พนักงานขาย',
+        title: `รายงานสินค้าคงเหลือ: ${name}`,
+        detail: `จำนวนเหลือ: ${qty} ชิ้น`,
+        date: new Date().toLocaleString('th-TH')
+      });
+      saveData();
+      alert('ส่งรายงานคงเหลือเรียบร้อย!');
+      this.reset();
+    });
+
+    // Sales Issue
+    document.getElementById('salesIssueForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const txt = document.getElementById('salesIssueText').value;
+
+      reports.push({
+        id: Date.now(),
+        sender: ACCOUNTS.SALES,
+        roleName: 'พนักงานขาย',
+        title: `⚠️ แจ้งปัญหาจากแผนกขาย`,
+        detail: txt,
+        date: new Date().toLocaleString('th-TH')
+      });
+      saveData();
+      alert('ส่งแจ้งปัญหาเรียบร้อย!');
+      this.reset();
+    });
+
+    // --- NOTIFICATION SYSTEM ---
+    function updateNotifBadge() {
+      let myNotifs = [];
+      if (currentUser === ACCOUNTS.OWNER) {
+        myNotifs = reports; // Owner sees all activity
+      } else {
+        myNotifs = notifications.filter(n => n.targetEmail === currentUser);
+      }
+      document.getElementById('notifBadge').innerText = myNotifs.length;
+      renderNotifList(myNotifs);
+    }
+
+    function renderNotifList(list) {
+      const container = document.getElementById('notifListContainer');
+      container.innerHTML = '';
+
+      if(list.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:20px;">ไม่มีการแจ้งเตือน</p>';
+        return;
+      }
+
+      list.slice().reverse().forEach(n => {
+        container.innerHTML += `
+          <div style="padding:12px; border-bottom:1px solid #f0f0f0;">
+            <strong style="color:var(--primary-hover);">${n.sender || n.roleName || 'ระบบ'}</strong>
+            <p style="margin:5px 0; font-size:0.95rem;">${n.message || n.title + ' - ' + n.detail}</p>
+            <span style="font-size:0.75rem; color:var(--text-light);">${n.date}</span>
+          </div>
+        `;
+      });
+    }
+
+    function toggleModal(id) {
+      const modal = document.getElementById(id);
+      modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+    }
+  </script>
+</body>
+</html>
